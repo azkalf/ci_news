@@ -24,7 +24,10 @@
 
     <!-- Morris Chart Css-->
     <link href="<?= base_url('assets/template/adminbsb/') ?>plugins/morrisjs/morris.css" rel="stylesheet" />
-    <?= isset($css) ? $css : '' ?>
+
+    <?php if (isset($css)) {
+        $this->load->view('css/'.$css);
+    } ?>
 
     <!-- Custom Css -->
     <link href="<?= base_url('assets/template/adminbsb/') ?>css/style.css" rel="stylesheet">

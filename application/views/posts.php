@@ -74,7 +74,7 @@
                                         <td><?= substr($post->description, 0, 11) ?></td>
                                         <td><?= $post->date_created ?></td>
                                         <td><?= $post->date_updated ?></td>
-                                        <td><a href="javascript:void(0);">Hapus</a> | <a href="javascript:void(0);">Edit</a></td>
+                                        <td><a href="javascript:void(0);" onclick="hapus_post('<?= $post->id ?>')">Hapus</a> | <a href="javascript:void(0);">Edit</a></td>
                                     </tr>
                                 <?php 
                                     }

@@ -31,16 +31,16 @@ class Login extends CI_Controller {
     		$checking = $this->user->check_login($where);
         	//jika ditemukan, maka create session
     		if ($checking != FALSE) {
-    			foreach ($checking as $user) {
-    				$session_data = array(
-    					'user_id' => $user->id,
-    					'user_name' => $user->name,
-    					'user_password' => $user->password,
-    				);
-                	//set session userdata
-    				$this->session->set_userdata($session_data);
-    				redirect('admin');
-    			}
+				$session_data = array(
+					'user_id' => $checking->id,
+					'user_name' => $checking->name,
+                    'user_password' => $checking->password,
+                    'user_photo' => $checking->photo,
+					'user_group' => $checking->group_id,
+				);
+            	//set session userdata
+				$this->session->set_userdata($session_data);
+				redirect('admin');
     		} else {
     			$data['error'] = '<label class="error col-red text-center">Your Login information does not match our credential!</label>';
     			$this->load->view('login', $data);
@@ -94,8 +94,8 @@ class Login extends CI_Controller {
 		$this->load->library('upload', $config);
 
 		if (!$this->upload->do_upload('photo')){
-			$error = array('error' => $this->upload->display_errors());
-			$this->load->view('register', $error);
+			$data['error'] = $this->upload->display_errors();
+			$this->load->view('register', $data);
 			return false;
 		} else{
 			return $this->upload->data('file_name');

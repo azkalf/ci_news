@@ -18,9 +18,30 @@ class Post extends CI_Model
         return $this->db->insert('categories', $data);
     }
 
+    function update_category($data)
+    {
+        $this->db->where('id', $data['id']);
+        return $this->db->update('categories', $data);
+    }
+
+    function unique_category($data)
+    {
+        $check = $this->db->get_where('categories', array('name'=>$data['name'], 'id !='=>$data['id']))->num_rows();
+        if ($check == 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     function delete_category($id)
     {
         return $this->db->delete('categories', array('id' => $id));
+    }
+
+    function get_category($id)
+    {
+        return $this->db->get_where('categories', array('id'=>$id))->row();
     }
 
     function post_lists($limit, $start) 
@@ -41,5 +62,10 @@ class Post extends CI_Model
     function insert_tags($id, $tag)
     {
         $this->db->insert('tags', array('post_id'=>$id, 'tag'=>$tag));
+    }
+
+    function delete_post($id)
+    {
+        return $this->db->delete('posts', array('id' => $id));
     }
 }

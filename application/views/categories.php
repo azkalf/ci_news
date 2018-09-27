@@ -24,7 +24,7 @@
                         </ul>
                     </div>
                     <div class="body table-responsive">
-                        <table class="table table-striped">
+                        <table class="table table-striped" id="category_table">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -32,13 +32,6 @@
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tfoot>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Category Name</th>
-                                    <th>Action</th>
-                                </tr>
-                            </tfoot>
                             <tbody>
                                 <?php 
                                 if (count($categories) > 0) {
@@ -46,8 +39,8 @@
                                 ?>
                                     <tr>
                                         <th scope="row"><?= $category->id ?></th>
-                                        <td><?= $category->name ?></td>
-                                        <td><a href="javascript:void(0);" onclick="testing('<?= $category->id ?>');">Hapus</a> | <a href="javascript:void(0);">Edit</a></td>
+                                        <td data-id="<?= $category->id ?>"><?= $category->name ?></td>
+                                        <td><a href="javascript:void(0);" onclick="hapus_category('<?= $category->id ?>');">Hapus</a> | <a href="javascript:void(0);" onclick="edit_category('<?= $category->id ?>')">Edit</a></td>
                                     </tr>
                                 <?php 
                                     }
@@ -66,7 +59,7 @@
         <div class="modal fade" id="create_category" tabindex="-1" role="dialog">
             <div class="modal-dialog modal-sm" role="document">
                 <div class="modal-content">
-                    <form action="<?= base_url('admin/categories') ?>" method="post">
+                    <form action="<?= site_url('admin/categories') ?>" method="post">
                         <div class="modal-header">
                             <h4 class="modal-title">Create Categories</h4>
                         </div>
@@ -89,13 +82,32 @@
                 </div>
             </div>
         </div>
+
+        <!-- MODAL -->
+        <div class="modal fade" id="edit_category" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Create Categories</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="material-icons">label</i>
+                            </span>
+                            <div class="form-line">
+                                <input type="hidden" name="id" id="category_id">
+                                <input type="text" class="form-control" name="name" id="category_name" placeholder="Category Name" required autofocus>
+                            </div>
+                            <?php echo form_error('name'); ?>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-link waves-effect" onclick="update_category()">SAVE CHANGES</button>
+                        <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">CLOSE</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
-
-<script type="text/javascript">
-    var testing = function(id) {
-        if (confirm('Are You Sure?\nWant to Delete this data?')) {
-            window.location = "<?= base_url() ?>admin/delete_category?id="+id;
-        }
-    }
-</script>

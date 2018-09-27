@@ -10,7 +10,7 @@ class User extends CI_Model
         if ($query->num_rows() == 0) {
             return FALSE;
         } else {
-            return $query->result();
+            return $query->row();
         }
     }
 

@@ -34,31 +34,6 @@ class Admin extends CI_Controller {
         $this->load->view("layouts/admin_footer");
     }
 
-    protected function pagination_config()
-    {
-        $config['page_query_string'] = true;
-        $config['query_string_segment'] = 'page';
-        $config['first_link'] = 'First';
-        $config['last_link'] = 'Last';
-        $config['next_link'] = 'Next';
-        $config['prev_link'] = 'Prev';
-        $config['full_tag_open'] = '<div class="pagging text-center"><nav><ul class="pagination justify-content-center">';
-        $config['full_tag_close'] = '</ul></nav></div>';
-        $config['num_tag_open'] = '<li class="page-item"><span class="page-link">';
-        $config['num_tag_close'] = '</span></li>';
-        $config['cur_tag_open'] = '<li class="page-item active"><span class="page-link">';
-        $config['cur_tag_close'] = '<span class="sr-only">(current)</span></span></li>';
-        $config['next_tag_open'] = '<li class="page-item"><span class="page-link">';
-        $config['next_tagl_close'] = '<span aria-hidden="true">&raquo;</span></span></li>';
-        $config['prev_tag_open'] = '<li class="page-item"><span class="page-link">';
-        $config['prev_tagl_close'] = '</span>Next</li>';
-        $config['first_tag_open'] = '<li class="page-item"><span class="page-link">';
-        $config['first_tagl_close'] = '</span></li>';
-        $config['last_tag_open'] = '<li class="page-item"><span class="page-link">';
-        $config['last_tagl_close'] = '</span></li>';
-        return $config;
-    }
-
     public function users()
     {   
         $config['base_url'] = site_url('admin/users');
@@ -66,7 +41,7 @@ class Admin extends CI_Controller {
         $config['per_page'] = 5;
         $choice = $config["total_rows"] / $config["per_page"];
         $config["num_links"] = floor($choice);
-        $pconfig = $this->pagination_config();
+        $pconfig = pagination_config();
         $config = array_merge($config, $pconfig);
 
         $this->pagination->initialize($config);
@@ -85,7 +60,7 @@ class Admin extends CI_Controller {
 
         $this->form_validation->set_message('is_unique', '<label class="error col-red">{field} already exist! please choose another name!</label>');
 
-        if ($this->form_validation->run()) {
+        if ($this->form_validation->run() == TRUE) {
             $data['name'] = $this->input->post('name');
             if ($this->post->insert_category($data)) {
                 redirect("admin/categories");
@@ -94,20 +69,17 @@ class Admin extends CI_Controller {
             }
         } else {
             if (count($this->input->post()) > 0) {
-                $footer['js'] = '<script type="text/javascript">
-                                    $(function() {
-                                        $("#create_category").modal("show");
-                                    })
-                                </script>';
+                $footer['posting'] = true;
             } else {
-                $footer['js'] = '';
+                $footer['posting'] = false;
             }
+            $footer['js'] = 'category_js';
 
             $config['base_url'] = site_url('admin/categories');
             $config['total_rows'] = $this->db->count_all('categories');
-            $config['per_page'] = 5;
+            $config['per_page'] = 3;
             $config["num_links"] = 2;
-            $pconfig = $this->pagination_config();
+            $pconfig = pagination_config();
             $config = array_merge($config, $pconfig);
 
             $this->pagination->initialize($config);
@@ -117,6 +89,7 @@ class Admin extends CI_Controller {
 
             $data['pagination'] = $this->pagination->create_links();
             $header['title'] = 'CATEGORY MANAGEMENT';
+            $header['css'] = 'category_css';
             $this->load->view("layouts/admin_header", $header);
             $this->load->view("categories", $data);
             $this->load->view("layouts/admin_footer", $footer);
@@ -129,6 +102,31 @@ class Admin extends CI_Controller {
         if ($this->post->delete_category($id)) {
             redirect("admin/categories");
         }
+    }
+
+    public function get_category()
+    {
+        $id = $this->input->post('id');
+        $category = $this->post->get_category($id);
+        echo json_encode($category);
+    }
+
+    public function update_category()
+    {
+        $data['id'] = $this->input->post('id');
+        $data['name'] = $this->input->post('name');
+        if ($this->post->unique_category($data)) {
+            if ($this->post->update_category($data)) {
+                $data['status'] = 'success';
+            } else {
+                $data['status'] = 'failed';
+                $data['message'] = 'failed to update data!';
+            }
+        } else {
+            $data['status'] = 'failed';
+            $data['message'] = 'category name already exist! choose another name!';
+        }
+        echo json_encode($data);
     }
 
     public function posts()
@@ -166,40 +164,13 @@ class Admin extends CI_Controller {
             }
         } else {
             if (count($this->input->post()) > 0) {
-                $footer['js'] = '<script type="text/javascript">
-                                    $(function() {
-                                        $("#create_post").modal("show");
-                                    })
-                                </script>';
+                $footer['posting'] = true;
             } else {
-                $footer['js'] = '';
+                $footer['posting'] = false;
             }
 
-            $header['css'] = '<link href="'.base_url().'assets/template/adminbsb/plugins/bootstrap-select/css/bootstrap-select.css" rel="stylesheet" />'.
-                '<link href="'.base_url().'assets/template/adminbsb/plugins/bootstrap-tagsinput/bootstrap-tagsinput.css" rel="stylesheet">';
-            $footer['js'] .= '<script src="'.base_url().'assets/template/adminbsb/plugins/bootstrap-select/js/bootstrap-select.js"></script>'.
-                '<script src="'.base_url().'assets/template/adminbsb/plugins/bootstrap-tagsinput/bootstrap-tagsinput.js"></script>'.
-                '<script src="'.base_url().'assets/template/adminbsb/plugins/tinymce/tinymce.js"></script>'.
-                '<script type="text/javascript">
-                    $(function() {
-                        tinymce.init({
-                            selector: "textarea#tinymce",
-                            theme: "modern",
-                            height: 300,
-                            plugins: [
-                                \'advlist autolink lists link image charmap print preview hr anchor pagebreak\',
-                                \'searchreplace wordcount visualblocks visualchars code fullscreen\',
-                                \'insertdatetime media nonbreaking save table contextmenu directionality\',
-                                \'emoticons template paste textcolor colorpicker textpattern imagetools\'
-                            ],
-                            toolbar1: \'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image\',
-                            toolbar2: \'print preview media | forecolor backcolor emoticons\',
-                            image_advtab: true
-                        });
-                        tinymce.suffix = ".min";
-                        tinyMCE.baseURL = \''.base_url().'assets/template/adminbsb/plugins/tinymce\';
-                    })
-                </script>';
+            $header['css'] = 'post_css';
+            $footer['js'] = 'post_js';
 
             $config['base_url'] = site_url('admin/posts'); //site url
             $config['total_rows'] = $this->db->count_all('posts'); //total row
@@ -207,7 +178,7 @@ class Admin extends CI_Controller {
             $config["uri_segment"] = 3;  // uri parameter
             $choice = $config["total_rows"] / $config["per_page"];
             $config["num_links"] = floor($choice);
-            $pconfig = $this->pagination_config();
+            $pconfig = pagination_config();
             $config = array_merge($config, $pconfig);
 
             $this->pagination->initialize($config);
@@ -236,37 +207,11 @@ class Admin extends CI_Controller {
         $this->load->library('upload', $config);
 
         if (!$this->upload->do_upload('image')){
-            $footer['js'] = '<script type="text/javascript">
-                                $(function() {
-                                    $("#create_post").modal("show");
-                                })
-                            </script>';
+            $footer['posting'] = true;
 
-            $header['css'] = '<link href="'.base_url().'assets/template/adminbsb/plugins/bootstrap-select/css/bootstrap-select.css" rel="stylesheet" />'.
-                '<link href="'.base_url().'assets/template/adminbsb/plugins/bootstrap-tagsinput/bootstrap-tagsinput.css" rel="stylesheet">';
-            $footer['js'] .= '<script src="'.base_url().'assets/template/adminbsb/plugins/bootstrap-select/js/bootstrap-select.js"></script>'.
-                '<script src="'.base_url().'assets/template/adminbsb/plugins/bootstrap-tagsinput/bootstrap-tagsinput.js"></script>'.
-                '<script src="'.base_url().'assets/template/adminbsb/plugins/tinymce/tinymce.js"></script>'.
-                '<script type="text/javascript">
-                    $(function() {
-                        tinymce.init({
-                            selector: "textarea#tinymce",
-                            theme: "modern",
-                            height: 300,
-                            plugins: [
-                                \'advlist autolink lists link image charmap print preview hr anchor pagebreak\',
-                                \'searchreplace wordcount visualblocks visualchars code fullscreen\',
-                                \'insertdatetime media nonbreaking save table contextmenu directionality\',
-                                \'emoticons template paste textcolor colorpicker textpattern imagetools\'
-                            ],
-                            toolbar1: \'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image\',
-                            toolbar2: \'print preview media | forecolor backcolor emoticons\',
-                            image_advtab: true
-                        });
-                        tinymce.suffix = ".min";
-                        tinyMCE.baseURL = \''.base_url().'assets/template/adminbsb/plugins/tinymce\';
-                    })
-                </script>';
+            $header['css'] = 'post_css';
+            $footer['js'] = 'post_js';
+
             $data['error'] = $this->upload->display_errors();
             $data['posts'] = $this->post->post_lists();
             $data['categories'] = $this->post->all_category_lists();
@@ -277,6 +222,14 @@ class Admin extends CI_Controller {
             return false;
         } else{
             return $this->upload->data('file_name');
+        }
+    }
+
+    public function delete_post()
+    {
+        $id = $this->input->get('id');
+        if ($this->post->delete_post($id)) {
+            redirect("admin/posts");
         }
     }
 }

@@ -32,7 +32,10 @@
 
     <!-- Sparkline Chart Plugin Js -->
     <script src="<?= base_url('assets/template/adminbsb/') ?>plugins/jquery-sparkline/jquery.sparkline.js"></script>
-    <?= isset($js) ? $js : '' ?>
+    
+    <?php if (isset($js)) {
+        $this->load->view('js/'.$js);
+    } ?>
 
     <!-- Custom Js -->
     <script src="<?= base_url('assets/template/adminbsb/') ?>js/admin.js"></script>
